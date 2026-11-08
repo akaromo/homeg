@@ -166,6 +166,7 @@ function leadsToRows(leads) {
       phone1: lead.phone1 || "",
       id_number: lead.id_number || "",
       email: lead.email || "",
+      comments: lead.comments || "",
       testmode: lead.testmode ? "yes" : "no"
     },
     result: {
@@ -198,6 +199,7 @@ function rowsToLeads(rows) {
       phone1: payload.phone1 || "",
       id_number: payload.id_number || "",
       email: payload.email || "",
+      comments: payload.comments || "",
       httpStatus: result.httpStatus || 0,
       status: row.status || result.status || "",
       code: row.code || result.code || "",
@@ -402,6 +404,7 @@ function buildLeadPayload(input, testmode) {
     phone1: String(input.phone1 || "").trim(),
     id_number: String(input.id_number || "").trim(),
     email: String(input.email || "").trim(),
+    comments: String(input.comments || "").trim(),
     brand: campaign.brand,
     channel: campaign.channel,
     sub_category: campaign.sub_category,
@@ -429,7 +432,8 @@ async function submitLead({ input, username, testmode }) {
     lastname: payload.lastname,
     phone1: payload.phone1,
     id_number: payload.id_number,
-    email: payload.email
+    email: payload.email,
+    comments: payload.comments
   };
 
   if (!apiKey) {
