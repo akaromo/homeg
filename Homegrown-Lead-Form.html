@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KCS Homegrown &middot; Lead Portal</title>
+<style>
+  :root{
+    --bg:#eef0f6;
+    --card:#ffffff;
+    --ink:#151a2d;
+    --muted:#6b7280;
+    --line:#e2e5ee;
+    --accent:#4b34c4;
+    --accent-dark:#37268f;
+    --ok:#0f7b52;
+    --ok-bg:#e7f6ef;
+    --err:#b42318;
+    --err-bg:#fdecea;
+    --warn:#8a5300;
+    --warn-bg:#fff4e0;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    padding:32px 16px 56px;
+    background:var(--bg);
+    color:var(--ink);
+    font:15px/1.5 "Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  .wrap{max-width:1000px;margin:0 auto}
+  .hidden{display:none !important}
+
+  /* ---------- login ---------- */
+  .login-shell{max-width:400px;margin:8vh auto 0}
+  .login-shell .head{border-radius:var(--radius);text-align:center}
+  .login-shell .card{border:1px solid var(--line);border-top:none;border-radius:0 0 var(--radius) var(--radius)}
+
+  /* ---------- shell ---------- */
+  .head{
+    background:linear-gradient(135deg,var(--accent) 0%,var(--accent-dark) 100%);
+    color:#fff;
+    border-radius:var(--radius) var(--radius) 0 0;
+    padding:24px 28px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .head h1{margin:0;font-size:22px;letter-spacing:.2px}
+  .head p{margin:6px 0 0;font-size:13px;opacity:.85}
+  .user-chip{display:flex;align-items:center;gap:10px;font-size:13px}
+  .user-chip .who{
+    background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:999px;
+    padding:5px 12px;
+    white-space:nowrap;
+  }
+  .user-chip .who b{font-weight:600}
+  .user-chip button{
+    background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.3);
+    color:#fff;
+    padding:6px 14px;
+    font-size:13px;
+    font-weight:500;
+    border-radius:999px;
+  }
+  .user-chip button:hover{background:rgba(255,255,255,.24)}
+
+  .tabs{
+    display:flex;
+    gap:2px;
+    background:#fafbff;
+    border-left:1px solid var(--line);
+    border-right:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:0 16px;
+    overflow-x:auto;
+  }
+  .tabs button{
+    background:transparent;
+    color:var(--muted);
+    border:0;
+    border-bottom:2px solid transparent;
+    border-radius:0;
+    padding:14px 16px;
+    font-size:14px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .tabs button:hover{background:transparent;color:var(--ink)}
+  .tabs button.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+  .campaign{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:1px;
+    background:var(--line);
+    border-left:1px solid var(--line);
+    border-right:1px solid var(--line);
+  }
+  .campaign div{background:#fafbff;padding:12px 16px}
+  .campaign span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+  .campaign strong{font-size:13px;font-weight:600}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-top:none;
+    border-radius:0 0 var(--radius) var(--radius);
+    padding:28px;
+  }
+  .card h2{margin:0 0 4px;font-size:16px}
+  .card h2 + .section-note{margin:0 0 22px;font-size:13px;color:var(--muted)}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:560px){.row{grid-template-columns:1fr}}
+
+  label{display:block;font-size:12px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  input[type=text],input[type=tel],input[type=email],input[type=password],select{
+    width:100%;
+    padding:11px 13px;
+    font-size:15px;
+    color:var(--ink);
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:9px;
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(75,52,196,.13)}
+  input.bad{border-color:var(--err);box-shadow:0 0 0 3px rgba(180,35,24,.1)}
+  .field{margin-bottom:16px}
+  .msg{min-height:16px;margin-top:5px;font-size:12px;color:var(--err)}
+  .hint{margin-top:5px;font-size:12px;color:var(--muted)}
+  .check{display:flex;align-items:center;gap:9px;font-size:14px}
+  .check input{width:auto}
+
+  .actions{display:flex;align-items:center;gap:14px;margin-top:24px;flex-wrap:wrap}
+  button{
+    padding:12px 26px;
+    font-size:15px;
+    font-weight:600;
+    color:#fff;
+    background:var(--accent);
+    border:0;
+    border-radius:9px;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  button:hover{background:var(--accent-dark)}
+  button:disabled{opacity:.6;cursor:default}
+  .reset{background:transparent;color:var(--muted);font-weight:500;padding:12px 6px}
+  .reset:hover{background:transparent;color:var(--ink)}
+  .ghost{
+    background:transparent;color:var(--accent);font-weight:600;
+    border:1px solid var(--line);padding:9px 18px;font-size:13px;border-radius:9px;
+  }
+  .ghost:hover{background:#f6f4ff}
+
+  .status{display:none;margin-top:20px;padding:13px 16px;border-radius:9px;font-size:14px;white-space:pre-wrap;word-break:break-word}
+  .status.show{display:block}
+  .status.ok{background:var(--ok-bg);color:var(--ok);border:1px solid #bfe6d4}
+  .status.err{background:var(--err-bg);color:var(--err);border:1px solid #f5c6c2}
+  .status.info{background:#eef1fb;color:var(--accent-dark);border:1px solid #d6dcf3}
+  .status.warn{background:var(--warn-bg);color:var(--warn);border:1px solid #f0dcb6}
+
+  .banner{
+    display:none;
+    margin:0 0 20px;
+    padding:12px 16px;
+    border-radius:9px;
+    font-size:13px;
+    background:var(--warn-bg);
+    color:var(--warn);
+    border:1px solid #f0dcb6;
+  }
+  .banner.show{display:block}
+
+  details{margin-top:24px;border-top:1px solid var(--line);padding-top:16px}
+  summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}
+  pre{
+    margin:12px 0 0;
+    padding:14px;
+    background:#151a2d;
+    color:#d9e0ff;
+    border-radius:9px;
+    font:12px/1.6 Consolas,"Courier New",monospace;
+    overflow-x:auto;
+  }
+
+  .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{
+    text-align:left;padding:11px 14px;background:#fafbff;color:var(--muted);
+    font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+    border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .pill{
+    display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;
+    background:#eef1fb;color:var(--accent-dark);
+  }
+  .pill.ok{background:var(--ok-bg);color:var(--ok)}
+  .pill.err{background:var(--err-bg);color:var(--err)}
+  .empty{padding:28px;text-align:center;color:var(--muted);font-size:14px}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .toolbar .meta{font-size:13px;color:var(--muted)}
+  .note{margin-top:18px;font-size:12px;color:var(--muted)}
+  code{background:#f0f2f8;padding:1px 5px;border-radius:4px;font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- ============================ LOGIN ============================ -->
+<div id="loginScreen" class="wrap login-shell">
+  <div class="head">
+    <div>
+      <h1>KCS Homegrown</h1>
+      <p>Car Insurance lead portal &middot; 3 Way Marketing</p>
+    </div>
+  </div>
+  <div class="card">
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="loginUser">Username</label>
+        <input type="text" id="loginUser" autocomplete="username" placeholder="agent">
+      </div>
+      <div class="field">
+        <label for="loginPass">Password</label>
+        <input type="password" id="loginPass" autocomplete="current-password" placeholder="Password">
+      </div>
+      <div class="actions" style="margin-top:8px">
+        <button type="submit" id="loginBtn" style="width:100%">Sign In</button>
+      </div>
+      <div class="status" id="loginStatus"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================= APP ============================= -->
+<div id="appScreen" class="wrap hidden">
+
+  <div class="head">
+    <div>
+      <h1>KCS Homegrown</h1>
+      <p>Car Insurance lead portal &middot; 3 Way Marketing</p>
+    </div>
+    <div class="user-chip">
+      <span class="who"><b id="whoName"></b> &middot; <span id="whoRole"></span></span>
+      <button type="button" id="logoutBtn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button type="button" data-view="submit" class="active">New Lead</button>
+    <button type="button" data-view="leads" data-min-role="admin">Submissions</button>
+    <button type="button" data-view="campaign" data-min-role="admin">Campaign</button>
+    <button type="button" data-view="access" data-min-role="admin">Access</button>
+    <button type="button" data-view="account">My Password</button>
+  </div>
+
+  <div class="campaign">
+    <div><span>Camp ID</span><strong id="c-campid">&mdash;</strong></div>
+    <div><span>Brand</span><strong id="c-brand">&mdash;</strong></div>
+    <div><span>Channel</span><strong id="c-channel">&mdash;</strong></div>
+    <div><span>Sub Category</span><strong id="c-subcat">&mdash;</strong></div>
+    <div><span>SID / SSID</span><strong id="c-sid">&mdash;</strong></div>
+    <div><span>Tenant</span><strong id="c-tenant">&mdash;</strong></div>
+  </div>
+
+  <div class="card">
+
+    <!-- ---------------------- NEW LEAD ---------------------- -->
+    <section id="view-submit">
+      <h2>New Lead</h2>
+      <p class="section-note">Capture the customer details and submit the lead to 3 Way.</p>
+
+      <div class="banner" id="keyBanner">
+        No LeadByte API key is configured yet, so submissions will fail.
+        Ask the super admin to add it under Access.
+      </div>
+      <div class="banner" id="passBanner">
+        Your password was set by someone else. Change it under <b>My Password</b> before going live.
+      </div>
+
+      <form id="leadForm" novalidate>
+        <div class="row">
+          <div class="field">
+            <label for="firstname">First Name</label>
+            <input type="text" id="firstname" autocomplete="given-name" placeholder="David">
+            <div class="msg" id="e-firstname"></div>
+          </div>
+          <div class="field">
+            <label for="lastname">Last Name</label>
+            <input type="text" id="lastname" autocomplete="family-name" placeholder="Beckham">
+            <div class="msg" id="e-lastname"></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="phone1">Contact Number</label>
+          <input type="tel" id="phone1" autocomplete="tel" placeholder="082 123 4567">
+          <div class="msg" id="e-phone1"></div>
+          <div class="hint">South African number. Sent to LeadByte as <code>0821234567</code>.</div>
+        </div>
+
+        <div class="field">
+          <label for="id_number">ID Number</label>
+          <input type="text" id="id_number" inputmode="numeric" autocomplete="off" placeholder="9001015800085" maxlength="13">
+          <div class="msg" id="e-id_number"></div>
+          <div class="hint">13-digit South African ID number.</div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" autocomplete="email" placeholder="leadbyte@aol.com">
+          <div class="msg" id="e-email"></div>
+        </div>
+
+        <div class="field hidden" id="testmodeField">
+          <label class="check">
+            <input type="checkbox" id="testmode">
+            <span>Test mode &mdash; bypasses validation, duplication checks and delivery</span>
+          </label>
+          <div class="hint">Admin only. Remember to switch this off before submitting real leads.</div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" id="submitBtn">Submit Lead</button>
+          <button type="button" class="reset" id="resetBtn">Clear form</button>
+        </div>
+
+        <div class="status" id="status"></div>
+      </form>
+
+      <details>
+        <summary>Payload preview</summary>
+        <pre id="preview">{}</pre>
+      </details>
+    </section>
+
+    <!-- ---------------------- SUBMISSIONS ---------------------- -->
+    <section id="view-leads" class="hidden">
+      <div class="toolbar">
+        <div>
+          <h2>Submissions</h2>
+          <p class="section-note" id="leadsCount" style="margin:4px 0 0">Recent lead submissions and their 3 Way responses.</p>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button type="button" class="ghost" id="refreshLeads">Refresh</button>
+          <button type="button" class="ghost" id="clearLeads">Clear log</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th><th>Agent</th><th>Name</th><th>Phone</th><th>Status</th><th>Message</th>
+            </tr>
+          </thead>
+          <tbody id="leadsBody"></tbody>
+        </table>
+        <div class="empty hidden" id="leadsEmpty">No submissions logged yet.</div>
+      </div>
+      <p class="note" id="storageNote">Submission history is stored securely for this portal.</p>
+    </section>
+
+    <!-- ---------------------- CAMPAIGN ---------------------- -->
+    <section id="view-campaign" class="hidden">
+      <h2>Campaign Settings</h2>
+      <p class="section-note">These values are attached to every lead sent to LeadByte.</p>
+
+      <form id="campaignForm" novalidate>
+        <div class="row">
+          <div class="field">
+            <label for="cfg-campid">Campaign ID</label>
+            <input type="text" id="cfg-campid">
+          </div>
+          <div class="field">
+            <label for="cfg-sid">SID</label>
+            <input type="text" id="cfg-sid">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="cfg-ssid">SSID</label>
+            <input type="text" id="cfg-ssid">
+          </div>
+          <div class="field">
+            <label for="cfg-brand">Brand</label>
+            <input type="text" id="cfg-brand">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="cfg-channel">Channel</label>
+            <select id="cfg-channel">
+              <option value="Warmup">Warmup</option>
+              <option value="WEB">WEB</option>
+              <option value="SMS">SMS</option>
+              <option value="AVM">AVM</option>
+              <option value="EMAIL">EMAIL</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="cfg-sub">Sub Category</label>
+            <select id="cfg-sub">
+              <option value="Car_Insurance">Car_Insurance</option>
+              <option value="Motor_Warranty">Motor_Warranty</option>
+              <option value="Vehicle_Tracking">Vehicle_Tracking</option>
+              <option value="Fines">Fines</option>
+              <option value="Service_Plan">Service_Plan</option>
+              <option value="Tyre_and_Rim">Tyre_and_Rim</option>
+              <option value="Scratch_and_Dent">Scratch_and_Dent</option>
+              <option value="Test_Drive">Test_Drive</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="cfg-tenant">Tenant Name</label>
+          <input type="text" id="cfg-tenant">
+        </div>
+
+        <div class="actions">
+          <button type="submit" id="saveCampaignBtn">Save Settings</button>
+        </div>
+        <div class="status" id="campaignStatus"></div>
+      </form>
+    </section>
+
+    <!-- ---------------------- ACCESS ---------------------- -->
+    <section id="view-access" class="hidden">
+      <div id="apiKeySection">
+        <h2>LeadByte API Key</h2>
+        <p class="section-note">Super admin only. Stored securely for this portal and sent as the <code>X_KEY</code> header when leads are posted.</p>
+
+        <form id="apiKeyForm" novalidate>
+          <div class="field">
+            <label for="apiKeyInput">API Key</label>
+            <input type="password" id="apiKeyInput" autocomplete="off" placeholder="Paste the LeadByte X_KEY">
+            <div class="hint" id="apiKeyHint"></div>
+          </div>
+          <div class="actions" style="margin-top:8px">
+            <button type="submit" id="saveKeyBtn">Save Key</button>
+            <button type="button" class="ghost" id="clearKeyBtn">Remove Key</button>
+          </div>
+          <div class="status" id="apiKeyStatus"></div>
+        </form>
+      </div>
+
+      <div id="usersSection" style="border-top:1px solid var(--line);margin:34px 0 0;padding-top:26px">
+        <h2>Portal Users</h2>
+        <p class="section-note">Create accounts and reset passwords for anyone on the team.</p>
+
+        <div class="table-wrap" style="margin-bottom:22px">
+          <table>
+            <thead>
+              <tr><th>Username</th><th>Role</th><th>Password</th></tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+
+        <form id="createUserForm" novalidate>
+          <div class="row">
+            <div class="field">
+              <label for="newUsername">Username</label>
+              <input type="text" id="newUsername" autocomplete="off" placeholder="e.g. thabo">
+              <div class="msg" id="e-newUsername"></div>
+            </div>
+            <div class="field">
+              <label for="newRole">Role</label>
+              <select id="newRole">
+                <option value="agent">Agent &mdash; submit leads only</option>
+                <option value="admin">Admin &mdash; leads, reports, settings</option>
+                <option value="superadmin" id="roleSuperOption">Super admin &mdash; also manages the API key</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="newPassword">Temporary Password</label>
+            <input type="password" id="newPassword" autocomplete="new-password">
+            <div class="msg" id="e-newPassword"></div>
+            <div class="hint">Minimum 8 characters. Give it to the user; they are asked to change it on first sign in.</div>
+          </div>
+          <div class="actions" style="margin-top:8px">
+            <button type="submit" id="createUserBtn">Create User</button>
+          </div>
+          <div class="status" id="createUserStatus"></div>
+        </form>
+      </div>
+
+      <div style="border-top:1px solid var(--line);margin:34px 0 0;padding-top:26px">
+        <h2>Reset a Password</h2>
+        <p class="section-note">Set a new password for any account without knowing the current one. That user is asked to change it when they next sign in.</p>
+
+        <form id="resetForm" novalidate>
+          <div class="field">
+            <label for="pwUser">Account</label>
+            <select id="pwUser"></select>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="pwNew">New Password</label>
+              <input type="password" id="pwNew" autocomplete="new-password">
+            </div>
+            <div class="field">
+              <label for="pwConfirm">Confirm New Password</label>
+              <input type="password" id="pwConfirm" autocomplete="new-password">
+            </div>
+          </div>
+          <div class="actions" style="margin-top:8px">
+            <button type="submit" id="savePasswordBtn">Reset Password</button>
+          </div>
+          <div class="status" id="passwordStatus"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ---------------------- MY PASSWORD ---------------------- -->
+    <section id="view-account" class="hidden">
+      <h2>My Password</h2>
+      <p class="section-note">Change the password for your own account. Signed in as <b id="accountName"></b>.</p>
+
+      <form id="myPasswordForm" novalidate>
+        <div class="field">
+          <label for="myCurrent">Current Password</label>
+          <input type="password" id="myCurrent" autocomplete="current-password">
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="myNew">New Password</label>
+            <input type="password" id="myNew" autocomplete="new-password">
+          </div>
+          <div class="field">
+            <label for="myConfirm">Confirm New Password</label>
+            <input type="password" id="myConfirm" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="actions" style="margin-top:8px">
+          <button type="submit" id="saveMyPasswordBtn">Update My Password</button>
+        </div>
+        <div class="status" id="myPasswordStatus"></div>
+      </form>
+    </section>
+
+  </div>
+</div>
+
+<script>
+/* ------------------------------------------------------------------
+   KCS Homegrown lead portal
+   Talks to lead-proxy.js, which holds the LeadByte API key and posts
+   leads to 3 Way. The browser never sees the key.
+------------------------------------------------------------------ */
+
+/* Works both when served by the proxy and when opened as a local file. */
+const API_BASE = location.protocol === "http:" || location.protocol === "https:"
+  ? ""
+  : "http://127.0.0.1:8787";
+
+const APP_STORAGE = "kcs-homegrown-session";
+const $ = id => document.getElementById(id);
+
+/* Mirrors the ranking the server enforces. */
+const ROLE_RANK = { agent: 1, admin: 2, superadmin: 3 };
+const ROLE_LABEL = { agent: "Agent", admin: "Admin", superadmin: "Super Admin" };
+
+let session = null;   // { token, username, role }
+let campaign = {};
+let hasApiKey = false;
+let storageMode = "local";
+
+function isSuperAdmin(){
+  return !!session && session.role === "superadmin";
+}
+
+function atLeast(role){
+  return !!session && (ROLE_RANK[session.role] || 0) >= ROLE_RANK[role];
+}
+
+/* ------------------------------------------------------------- helpers */
+
+function setStatus(elId, kind, text){
+  const el = $(elId);
+  if (!kind) { el.className = "status"; el.textContent = ""; return; }
+  el.className = "status show " + kind;
+  el.textContent = text;
+}
+
+function formatResponse(text){
+  try {
+    return JSON.stringify(JSON.parse(text), null, 2);
+  } catch (err) {
+    return text || "(empty)";
+  }
+}
+
+function formatTime(iso){
+  const date = new Date(iso);
+  return isNaN(date) ? iso : date.toLocaleString();
+}
+
+async function api(path, { method = "GET", body, auth = true } = {}){
+  const headers = { "Accept": "application/json" };
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (auth && session) headers["Authorization"] = "Bearer " + session.token;
+
+  const res = await fetch(API_BASE + path, {
+    method,
+    headers,
+    body: body === undefined ? undefined : JSON.stringify(body)
+  });
+
+  const text = (await res.text()).trim();
+  let data = {};
+  try { data = text ? JSON.parse(text) : {}; } catch (err) { data = { message: text }; }
+
+  if (res.status === 401 && auth) { signOut(true); }
+  return { ok: res.ok, status: res.status, data, raw: text };
+}
+
+/* --------------------------------------------------------------- login */
+
+$("loginForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const username = $("loginUser").value.trim();
+  const password = $("loginPass").value;
+
+  if (!username || !password) {
+    setStatus("loginStatus", "err", "Enter your username and password.");
+    return;
+  }
+
+  $("loginBtn").disabled = true;
+  setStatus("loginStatus", "info", "Signing in...");
+
+  try {
+    const { ok, data } = await api("/api/login", {
+      method: "POST",
+      auth: false,
+      body: { username, password }
+    });
+
+    if (!ok) {
+      setStatus("loginStatus", "err", data.message || "Sign in failed.");
+      return;
+    }
+
+    session = { token: data.token, username: data.username, role: data.role };
+    sessionStorage.setItem(APP_STORAGE, JSON.stringify(session));
+    setStatus("loginStatus", null);
+    $("loginPass").value = "";
+    enterApp(data.mustChangePassword);
+  } catch (err) {
+    setStatus("loginStatus", "err",
+      "Cannot reach the portal server.\nStart it with: node lead-proxy.js");
+  } finally {
+    $("loginBtn").disabled = false;
+  }
+});
+
+async function signOut(silent){
+  if (session) {
+    try { await api("/api/logout", { method: "POST" }); } catch (err) { /* ignore */ }
+  }
+  session = null;
+  sessionStorage.removeItem(APP_STORAGE);
+  $("appScreen").classList.add("hidden");
+  $("loginScreen").classList.remove("hidden");
+  if (!silent) setStatus("loginStatus", "info", "You have been signed out.");
+}
+
+$("logoutBtn").addEventListener("click", () => signOut(false));
+
+/* ----------------------------------------------------------- app setup */
+
+function enterApp(mustChangePassword){
+  $("loginScreen").classList.add("hidden");
+  $("appScreen").classList.remove("hidden");
+
+  $("whoName").textContent = session.username;
+  $("whoRole").textContent = ROLE_LABEL[session.role] || session.role;
+  $("accountName").textContent = session.username;
+
+  /* Agents only get lead capture and their own password. */
+  document.querySelectorAll("#tabs button[data-min-role]").forEach(btn => {
+    btn.classList.toggle("hidden", !atLeast(btn.dataset.minRole));
+  });
+
+  /* The API key belongs to the super admin alone. */
+  $("apiKeySection").classList.toggle("hidden", !isSuperAdmin());
+  $("roleSuperOption").hidden = !isSuperAdmin();
+  $("testmodeField").classList.toggle("hidden", !atLeast("admin"));
+
+  showView("submit");
+  $("passBanner").classList.toggle("show", !!mustChangePassword);
+  loadCampaign();
+}
+
+$("tabs").addEventListener("click", ev => {
+  const btn = ev.target.closest("button[data-view]");
+  if (btn) showView(btn.dataset.view);
+});
+
+function showView(name){
+  ["submit", "leads", "campaign", "access", "account"].forEach(view => {
+    $("view-" + view).classList.toggle("hidden", view !== name);
+  });
+  document.querySelectorAll("#tabs button").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.view === name);
+  });
+
+  if (name === "leads") loadLeads();
+  if (name === "campaign" || name === "access") loadConfig();
+  renderPreview();
+}
+
+/* ---------------------------------------------------------- campaign */
+
+function paintCampaignChips(){
+  $("c-campid").textContent  = campaign.campid || "—";
+  $("c-brand").textContent   = campaign.brand || "—";
+  $("c-channel").textContent = campaign.channel || "—";
+  $("c-subcat").textContent  = campaign.sub_category || "—";
+  $("c-sid").textContent     = (campaign.sid || "—") + " / " + (campaign.ssid || "—");
+  $("c-tenant").textContent  = campaign.tenant_name || "—";
+}
+
+async function loadCampaign(){
+  try {
+    const { ok, data } = await api("/api/campaign");
+    if (!ok) return;
+    campaign = data.campaign || {};
+    hasApiKey = !!data.hasApiKey;
+    storageMode = data.storage || "local";
+    paintCampaignChips();
+    $("keyBanner").classList.toggle("show", !hasApiKey);
+    $("storageNote").textContent = storageMode === "supabase"
+      ? "Submission history is stored in Supabase for this portal."
+      : "Submission history is stored on this machine in homegrown-store.json.";
+    renderPreview();
+  } catch (err) {
+    setStatus("status", "err", "Cannot reach the portal server. Start it with: node lead-proxy.js");
+  }
+}
+
+async function loadConfig(){
+  if (!atLeast("admin")) return;
+  const { ok, data } = await api("/api/admin/config");
+  if (!ok) return;
+
+  campaign = data.campaign || {};
+  hasApiKey = !!data.hasApiKey;
+  paintCampaignChips();
+
+  $("cfg-campid").value = campaign.campid || "";
+  $("cfg-sid").value    = campaign.sid || "";
+  $("cfg-ssid").value   = campaign.ssid || "";
+  $("cfg-brand").value  = campaign.brand || "";
+  $("cfg-channel").value = campaign.channel || "Warmup";
+  $("cfg-sub").value    = campaign.sub_category || "Car_Insurance";
+  $("cfg-tenant").value = campaign.tenant_name || "";
+
+  $("apiKeyHint").textContent = data.apiKeyHint
+    ? "A key is saved (" + data.apiKeyHint + "). Leave the field blank to keep it."
+    : (hasApiKey
+        ? "A key is saved. Leave the field blank to keep it."
+        : "No key saved yet. Submissions will fail until one is added.");
+
+  $("pwUser").innerHTML = (data.users || [])
+    .map(user => `<option value="${user.username}">${user.username} — ${ROLE_LABEL[user.role] || user.role}</option>`)
+    .join("");
+
+  renderUsers(data.users);
+  renderPreview();
+}
+
+function renderUsers(users){
+  const body = $("usersBody");
+  body.innerHTML = "";
+
+  (users || []).forEach(user => {
+    const rolePill = user.role === "superadmin"
+      ? '<span class="pill err">Super Admin</span>'
+      : '<span class="pill">' + (ROLE_LABEL[user.role] || user.role) + "</span>";
+
+    const row = document.createElement("tr");
+    row.innerHTML =
+      "<td>" + user.username + "</td>" +
+      "<td>" + rolePill + "</td>" +
+      "<td>" + (user.mustChange
+        ? '<span class="pill err">Temporary &mdash; not yet changed</span>'
+        : '<span class="pill ok">Changed by user</span>') + "</td>";
+    body.appendChild(row);
+  });
+}
+
+/* ------------------------------------------------------- lead capture */
+
+function normalisePhone(raw){
+  let d = raw.replace(/[^\d+]/g, "");
+  d = d.replace(/^\+/, "");
+  if (d.startsWith("27") && d.length === 11) d = "0" + d.slice(2);
+  return d;
+}
+
+function leadPayload(){
+  const data = {
+    firstname: $("firstname").value.trim(),
+    lastname: $("lastname").value.trim(),
+    phone1: normalisePhone($("phone1").value),
+    id_number: $("id_number").value.trim(),
+    email: $("email").value.trim()
+  };
+  if (atLeast("admin") && $("testmode").checked) {
+    data.testmode = true;
+  }
+  return data;
+}
+
+function fullPayload(){
+  return Object.assign({
+    campid: campaign.campid,
+    sid: campaign.sid,
+    ssid: campaign.ssid,
+    brand: campaign.brand,
+    channel: campaign.channel,
+    sub_category: campaign.sub_category,
+    tenant_name: campaign.tenant_name
+  }, leadPayload());
+}
+
+function renderPreview(){
+  $("preview").textContent = JSON.stringify(fullPayload(), null, 2);
+}
+
+function validate(){
+  let ok = true;
+  const set = (id, text) => {
+    $("e-" + id).textContent = text;
+    $(id).classList.toggle("bad", !!text);
+    if (text) ok = false;
+  };
+
+  const nameRe = /^[A-Za-z][A-Za-z\s'\-]{1,39}$/;
+  set("firstname", nameRe.test($("firstname").value.trim()) ? "" : "Enter a valid first name (letters only).");
+  set("lastname",  nameRe.test($("lastname").value.trim())  ? "" : "Enter a valid last name (letters only).");
+  set("phone1",    /^0[1-8]\d{8}$/.test(normalisePhone($("phone1").value)) ? "" : "Enter a valid SA number, e.g. 0821234567.");
+  set("id_number", /^\d{13}$/.test($("id_number").value.trim()) ? "" : "Enter a 13-digit ID number.");
+  set("email",     /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test($("email").value.trim()) ? "" : "Enter a valid email address.");
+
+  return ok;
+}
+
+$("leadForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  renderPreview();
+  if (!validate()) { setStatus("status", "err", "Please correct the highlighted fields."); return; }
+
+  const btn = $("submitBtn");
+  btn.disabled = true;
+  setStatus("status", "info", "Submitting lead to 3 Way...");
+
+  try {
+    const { ok, data, raw } = await api("/api/leads", { method: "POST", body: leadPayload() });
+    const failed = !ok || (data.status && String(data.status).toLowerCase() === "error");
+    setStatus("status", failed ? "err" : "ok", "3 Way response:\n" + formatResponse(raw));
+  } catch (err) {
+    setStatus("status", "err",
+      "Cannot reach the portal server.\nStart it with: node lead-proxy.js");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("resetBtn").addEventListener("click", () => {
+  ["firstname", "lastname", "phone1", "id_number", "email"].forEach(id => {
+    $(id).value = "";
+    $("e-" + id).textContent = "";
+    $(id).classList.remove("bad");
+  });
+  $("testmode").checked = false;
+  setStatus("status", null);
+  renderPreview();
+});
+
+["firstname", "lastname", "phone1", "id_number", "email"].forEach(id => {
+  $(id).addEventListener("input", () => {
+    if ($("e-" + id).textContent) { $("e-" + id).textContent = ""; $(id).classList.remove("bad"); }
+    renderPreview();
+  });
+});
+$("testmode").addEventListener("change", renderPreview);
+
+/* ------------------------------------------------------ submissions */
+
+async function loadLeads(){
+  const { ok, data } = await api("/api/admin/leads");
+  if (!ok) return;
+
+  const leads = data.leads || [];
+  const body = $("leadsBody");
+  body.innerHTML = "";
+
+  $("leadsCount").textContent = leads.length === 1
+    ? "1 submission logged."
+    : leads.length + " submissions logged.";
+  $("leadsEmpty").classList.toggle("hidden", leads.length > 0);
+
+  leads.forEach(lead => {
+    const okRow = String(lead.status || "").toLowerCase() === "success";
+    const detail = [lead.code ? "code " + lead.code : "", lead.message, lead.queueId ? "queueId " + lead.queueId : ""]
+      .filter(Boolean).join(" — ");
+
+    const row = document.createElement("tr");
+    row.innerHTML =
+      "<td>" + formatTime(lead.timestamp) + (lead.testmode ? ' <span class="pill">test</span>' : "") + "</td>" +
+      "<td>" + (lead.username || "") + "</td>" +
+      "<td>" + (lead.firstname || "") + " " + (lead.lastname || "") + "</td>" +
+      "<td>" + (lead.phone1 || "") + "</td>" +
+      '<td><span class="pill ' + (okRow ? "ok" : "err") + '">' + (lead.status || "Unknown") + "</span></td>" +
+      "<td>" + (detail || "—") + "</td>";
+    body.appendChild(row);
+  });
+}
+
+$("refreshLeads").addEventListener("click", loadLeads);
+
+$("clearLeads").addEventListener("click", async () => {
+  if (!confirm("Clear the whole submission log? This cannot be undone.")) return;
+  await api("/api/admin/leads/clear", { method: "POST" });
+  loadLeads();
+});
+
+/* -------------------------------------------------- campaign settings */
+
+$("campaignForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const btn = $("saveCampaignBtn");
+  btn.disabled = true;
+
+  const next = {
+    campid: $("cfg-campid").value.trim(),
+    sid: $("cfg-sid").value.trim(),
+    ssid: $("cfg-ssid").value.trim(),
+    brand: $("cfg-brand").value.trim(),
+    channel: $("cfg-channel").value,
+    sub_category: $("cfg-sub").value,
+    tenant_name: $("cfg-tenant").value.trim()
+  };
+
+  try {
+    const { ok, data } = await api("/api/admin/config", { method: "PUT", body: { campaign: next } });
+    if (!ok) { setStatus("campaignStatus", "err", data.message || "Could not save settings."); return; }
+    campaign = data.campaign || next;
+    paintCampaignChips();
+    renderPreview();
+    setStatus("campaignStatus", "ok", "Campaign settings saved.");
+  } catch (err) {
+    setStatus("campaignStatus", "err", "Cannot reach the portal server.");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* --------------------------------------------------------- api key */
+
+$("apiKeyForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const key = $("apiKeyInput").value.trim();
+  if (!key) { setStatus("apiKeyStatus", "err", "Paste the API key first."); return; }
+
+  const btn = $("saveKeyBtn");
+  btn.disabled = true;
+  try {
+    const { ok, data } = await api("/api/admin/apikey", { method: "PUT", body: { apiKey: key } });
+    if (!ok) { setStatus("apiKeyStatus", "err", data.message || "Could not save the key."); return; }
+    hasApiKey = !!data.hasApiKey;
+    $("apiKeyInput").value = "";
+    $("keyBanner").classList.toggle("show", !hasApiKey);
+    loadConfig();
+    setStatus("apiKeyStatus", "ok", "API key saved.");
+  } catch (err) {
+    setStatus("apiKeyStatus", "err", "Cannot reach the portal server.");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("clearKeyBtn").addEventListener("click", async () => {
+  if (!confirm("Remove the stored LeadByte API key? Submissions will fail until a new one is saved.")) return;
+  const { ok } = await api("/api/admin/apikey", { method: "PUT", body: { clear: true } });
+  if (ok) {
+    hasApiKey = false;
+    $("keyBanner").classList.toggle("show", true);
+    loadConfig();
+    setStatus("apiKeyStatus", "ok", "API key removed.");
+  }
+});
+
+/* ------------------------------------------------------ portal users */
+
+function setFieldError(id, text){
+  $("e-" + id).textContent = text;
+  $(id).classList.toggle("bad", !!text);
+}
+
+$("createUserForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+
+  const username = $("newUsername").value.trim().toLowerCase();
+  const password = $("newPassword").value;
+  const role = $("newRole").value;
+
+  const usernameOk = /^[a-z0-9._-]{3,32}$/.test(username);
+  setFieldError("newUsername", usernameOk ? "" : "3-32 characters: letters, numbers, dot, dash or underscore.");
+  setFieldError("newPassword", password.length >= 8 ? "" : "Minimum 8 characters.");
+  if (!usernameOk || password.length < 8) return;
+
+  const btn = $("createUserBtn");
+  btn.disabled = true;
+
+  try {
+    const { ok, data } = await api("/api/admin/users", {
+      method: "POST",
+      body: { username, password, role }
+    });
+
+    if (!ok) { setStatus("createUserStatus", "err", data.message || "Could not create the user."); return; }
+
+    setStatus("createUserStatus", "ok",
+      (data.message || "User created.") + "\nThey will be asked to set their own password on first sign in.");
+    $("newUsername").value = "";
+    $("newPassword").value = "";
+    $("newRole").value = "agent";
+    loadConfig();
+  } catch (err) {
+    setStatus("createUserStatus", "err", "Cannot reach the portal server.");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+["newUsername", "newPassword"].forEach(id => {
+  $(id).addEventListener("input", () => setFieldError(id, ""));
+});
+
+/* -------------------------------------------------------- passwords */
+
+/* Admin reset: sets a password for any account, no current password needed. */
+$("resetForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const username = $("pwUser").value;
+  const newPassword = $("pwNew").value;
+  const confirmPassword = $("pwConfirm").value;
+
+  if (!username) { setStatus("passwordStatus", "err", "Choose an account first."); return; }
+  if (newPassword.length < 8) {
+    setStatus("passwordStatus", "err", "New password must be at least 8 characters.");
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    setStatus("passwordStatus", "err", "The two new passwords do not match.");
+    return;
+  }
+
+  const btn = $("savePasswordBtn");
+  btn.disabled = true;
+  try {
+    const { ok, data } = await api("/api/admin/password", {
+      method: "POST",
+      body: { username, newPassword }
+    });
+    if (!ok) { setStatus("passwordStatus", "err", data.message || "Could not reset the password."); return; }
+
+    setStatus("passwordStatus", "ok",
+      (data.message || "Password updated.") + "\nGive the new password to " + username +
+      "; they will be asked to change it when they sign in.");
+    ["pwNew", "pwConfirm"].forEach(id => $(id).value = "");
+    if (username === session.username) $("passBanner").classList.remove("show");
+    loadConfig();
+  } catch (err) {
+    setStatus("passwordStatus", "err", "Cannot reach the portal server.");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* Self service: available to every role, including agents. */
+$("myPasswordForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const currentPassword = $("myCurrent").value;
+  const newPassword = $("myNew").value;
+  const confirmPassword = $("myConfirm").value;
+
+  if (!currentPassword) { setStatus("myPasswordStatus", "err", "Enter your current password."); return; }
+  if (newPassword.length < 8) {
+    setStatus("myPasswordStatus", "err", "New password must be at least 8 characters.");
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    setStatus("myPasswordStatus", "err", "The two new passwords do not match.");
+    return;
+  }
+
+  const btn = $("saveMyPasswordBtn");
+  btn.disabled = true;
+  try {
+    const { ok, data } = await api("/api/password", {
+      method: "POST",
+      body: { currentPassword, newPassword }
+    });
+    if (!ok) { setStatus("myPasswordStatus", "err", data.message || "Could not update your password."); return; }
+
+    setStatus("myPasswordStatus", "ok", data.message || "Your password has been updated.");
+    ["myCurrent", "myNew", "myConfirm"].forEach(id => $(id).value = "");
+    $("passBanner").classList.remove("show");
+  } catch (err) {
+    setStatus("myPasswordStatus", "err", "Cannot reach the portal server.");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* ------------------------------------------------------------- boot */
+
+(async function boot(){
+  const saved = sessionStorage.getItem(APP_STORAGE);
+  if (!saved) return;
+
+  try {
+    session = JSON.parse(saved);
+    const { ok, data } = await api("/api/session");
+    if (!ok) { session = null; sessionStorage.removeItem(APP_STORAGE); return; }
+    session.username = data.username;
+    session.role = data.role;
+    enterApp(data.mustChangePassword);
+  } catch (err) {
+    session = null;
+    sessionStorage.removeItem(APP_STORAGE);
+  }
+})();
+
+renderPreview();
+</script>
+</body>
+</html>

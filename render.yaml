@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: kcs-homegrown
+    runtime: node
+    plan: free
+    autoDeploy: true
+    buildCommand: ""
+    startCommand: npm start
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: LEADBYTE_X_KEY
+        sync: false

@@ -1,0 +1,13 @@
+{
+  "name": "kcs-homegrown",
+  "version": "1.0.0",
+  "private": true,
+  "description": "KCS Homegrown lead portal for 3 Way Marketing",
+  "main": "lead-proxy.js",
+  "scripts": {
+    "start": "node lead-proxy.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
